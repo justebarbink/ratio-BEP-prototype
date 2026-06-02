@@ -1,4 +1,5 @@
 import streamlit as st
+import time
 
 st.set_page_config(
     page_title="Ratio Smart Charging",
@@ -6,6 +7,28 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="collapsed"
 )
+
+# -----------------------------
+# Splash screen state
+# -----------------------------
+if "intro_done" not in st.session_state:
+    st.session_state.intro_done = False
+
+if "screen" not in st.session_state:
+    st.session_state.screen = "home"
+
+if "selected_mode" not in st.session_state:
+    st.session_state.selected_mode = None
+
+
+def go_to(screen):
+    st.session_state.screen = screen
+
+
+def select_mode(mode):
+    st.session_state.selected_mode = mode
+    st.session_state.screen = "detail"
+
 
 # -----------------------------
 # Styling
@@ -27,10 +50,41 @@ st.markdown(
         background-color: #f6f8f6;
     }
 
+    .splash-screen {
+        height: 720px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .splash-logo {
+        font-size: 46px;
+        font-weight: 900;
+        letter-spacing: 5px;
+        color: #103221;
+        margin-bottom: 6px;
+    }
+
+    .splash-subtitle {
+        font-size: 15px;
+        color: #6a716c;
+        letter-spacing: 1px;
+    }
+
+    .splash-line {
+        width: 56px;
+        height: 4px;
+        background: #3f7d4e;
+        border-radius: 10px;
+        margin-top: 18px;
+    }
+
     .app-title {
         text-align: center;
         font-size: 28px;
-        font-weight: 800;
+        font-weight: 850;
         color: #0f2a1d;
         margin-bottom: 0px;
     }
@@ -44,9 +98,9 @@ st.markdown(
 
     .visual-card {
         background: white;
-        border-radius: 24px;
+        border-radius: 28px;
         padding: 24px;
-        box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+        box-shadow: 0 6px 24px rgba(0,0,0,0.07);
         text-align: center;
         margin-bottom: 18px;
     }
@@ -57,6 +111,10 @@ st.markdown(
         align-items: center;
         gap: 14px;
         margin-bottom: 22px;
+        background: #f4faf6;
+        border: 1px solid #dbe8df;
+        border-radius: 24px;
+        padding: 28px 12px;
     }
 
     .device-box {
@@ -65,14 +123,26 @@ st.markdown(
         padding: 14px 18px;
         font-weight: 800;
         color: #123322;
-        background: #f8fbf9;
+        background: white;
         font-size: 14px;
     }
 
     .line {
-        width: 40px;
+        width: 42px;
         height: 2px;
         background: #3f7d4e;
+        position: relative;
+    }
+
+    .line:after {
+        content: "";
+        position: absolute;
+        right: -4px;
+        top: -4px;
+        width: 10px;
+        height: 10px;
+        background: #3f7d4e;
+        border-radius: 50%;
     }
 
     .battery-big {
@@ -94,16 +164,16 @@ st.markdown(
         color: #1f3d2b;
         padding: 10px;
         border-radius: 14px;
-        font-weight: 700;
+        font-weight: 750;
         font-size: 14px;
     }
 
     .mini-card {
         background: white;
-        border-radius: 18px;
-        padding: 14px 16px;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
-        margin-bottom: 16px;
+        border-radius: 20px;
+        padding: 15px 17px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        margin-bottom: 18px;
     }
 
     .mini-row {
@@ -113,24 +183,34 @@ st.markdown(
         margin-bottom: 4px;
     }
 
+    .mode-menu {
+        margin-top: 6px;
+        margin-bottom: 8px;
+    }
+
     div.stButton > button {
         width: 100%;
-        min-height: 95px;
-        border-radius: 20px;
+        border-radius: 24px;
         border: 1px solid #d8e5dc;
         background: white;
         color: #103221;
-        box-shadow: 0px 3px 12px rgba(0,0,0,0.06);
-        font-size: 15px;
-        font-weight: 700;
+        box-shadow: 0px 5px 18px rgba(0,0,0,0.07);
         white-space: pre-line;
         line-height: 1.25;
+        padding: 0.9rem 0.7rem;
+        font-size: 15px;
+        font-weight: 750;
     }
 
     div.stButton > button:hover {
         background: #e8f2ec;
         border: 1px solid #3f7d4e;
         color: #103221;
+        transform: translateY(-1px);
+    }
+
+    div.stButton > button:active {
+        transform: scale(0.98);
     }
 
     .detail-header {
@@ -139,8 +219,17 @@ st.markdown(
     }
 
     .mode-icon {
-        font-size: 34px;
-        margin-bottom: 4px;
+        width: 58px;
+        height: 58px;
+        border-radius: 20px;
+        margin: 0 auto 10px auto;
+        background: #e8f2ec;
+        color: #2f6b45;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        font-weight: 900;
     }
 
     .mode-title {
@@ -154,28 +243,33 @@ st.markdown(
         font-size: 14px;
         color: #6a716c;
     }
+
+    .back-space {
+        margin-top: 8px;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
+
 # -----------------------------
-# Session state
+# Intro screen
 # -----------------------------
-if "screen" not in st.session_state:
-    st.session_state.screen = "home"
-
-if "selected_mode" not in st.session_state:
-    st.session_state.selected_mode = None
-
-
-def go_to(screen):
-    st.session_state.screen = screen
-
-
-def select_mode(mode):
-    st.session_state.selected_mode = mode
-    st.session_state.screen = "detail"
+if not st.session_state.intro_done:
+    st.markdown(
+        """
+        <div class="splash-screen">
+            <div class="splash-logo">RAATIO</div>
+            <div class="splash-subtitle">SMART CHARGING</div>
+            <div class="splash-line"></div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    time.sleep(3)
+    st.session_state.intro_done = True
+    st.rerun()
 
 
 # -----------------------------
@@ -189,6 +283,7 @@ modes = {
         "name": "Boost",
         "short": "Snel extra bereik",
         "subtitle": "Voor wanneer je snel weer weg moet.",
+        "button": "⚡\nBoost\nSnel extra bereik",
         "status": "Laden start direct met hoge prioriteit.",
         "data": {
             "Focus": "Snelheid",
@@ -200,10 +295,11 @@ modes = {
         "preference": False,
     },
     "morning": {
-        "icon": "🌙",
+        "icon": "◐",
         "name": "Morgen klaar",
         "short": "Op tijd klaar",
         "subtitle": "Voor normaal avondgebruik.",
+        "button": "◐\nMorgen klaar\nOp tijd klaar",
         "status": "De auto wordt slim opgeladen vóór de ingestelde vertrektijd.",
         "data": {
             "Vertrek": "08:00",
@@ -216,10 +312,11 @@ modes = {
         "preference": False,
     },
     "smart": {
-        "icon": "🌱",
+        "icon": "◍",
         "name": "Slim laden",
         "short": "Beste balans",
         "subtitle": "Voor wanneer er geen directe haast is.",
+        "button": "◍\nSlim laden\nBeste balans",
         "status": "Het systeem kiest het meest gunstige laadmoment.",
         "data": {
             "Prijs": "Meegenomen",
@@ -236,6 +333,7 @@ modes = {
         "name": "Vol bereik",
         "short": "Lange rit",
         "subtitle": "Voor wanneer er een lange rit gepland staat.",
+        "button": "▰\nVol bereik\nLange rit",
         "status": "De auto wordt opgeladen tot een hoger laadniveau.",
         "data": {
             "Focus": "Zekerheid",
@@ -252,6 +350,7 @@ modes = {
         "name": "Routine",
         "short": "Vaste patronen",
         "subtitle": "Voor terugkerend autogebruik.",
+        "button": "↻\nRoutine\nVaste patronen",
         "status": "Het laadplan volgt vaste vertrektijden en gewoontes.",
         "data": {
             "Vertrek": "08:00",
@@ -267,6 +366,7 @@ modes = {
         "name": "Handmatig",
         "short": "Zelf instellen",
         "subtitle": "Voor gebruikers die zelf controle willen houden.",
+        "button": "☰\nHandmatig\nZelf instellen",
         "status": "De gebruiker bepaalt zelf de belangrijkste laadinstellingen.",
         "data": {
             "Controle": "Hoog",
@@ -279,6 +379,7 @@ modes = {
         "preference": True,
     },
 }
+
 
 # -----------------------------
 # Home screen
@@ -310,6 +411,7 @@ if st.session_state.screen == "home":
         go_to("modes")
         st.rerun()
 
+
 # -----------------------------
 # Mode menu screen
 # -----------------------------
@@ -330,37 +432,40 @@ elif st.session_state.screen == "modes":
         unsafe_allow_html=True
     )
 
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2, gap="medium")
 
     with col1:
-        if st.button("⚡\nBoost\nSnel extra bereik"):
+        if st.button(modes["boost"]["button"]):
             select_mode("boost")
             st.rerun()
 
-        if st.button("🌱\nSlim laden\nBeste balans"):
+        if st.button(modes["smart"]["button"]):
             select_mode("smart")
             st.rerun()
 
-        if st.button("↻\nRoutine\nVaste patronen"):
+        if st.button(modes["routine"]["button"]):
             select_mode("routine")
             st.rerun()
 
     with col2:
-        if st.button("🌙\nMorgen klaar\nOp tijd klaar"):
+        if st.button(modes["morning"]["button"]):
             select_mode("morning")
             st.rerun()
 
-        if st.button("▰\nVol bereik\nLange rit"):
+        if st.button(modes["full"]["button"]):
             select_mode("full")
             st.rerun()
 
-        if st.button("☰\nHandmatig\nZelf instellen"):
+        if st.button(modes["manual"]["button"]):
             select_mode("manual")
             st.rerun()
+
+    st.markdown('<div class="back-space"></div>', unsafe_allow_html=True)
 
     if st.button("Terug"):
         go_to("home")
         st.rerun()
+
 
 # -----------------------------
 # Detail screen
@@ -416,8 +521,8 @@ elif st.session_state.screen == "detail":
         data["Gewenst"] = f"{desired_range}%"
 
     cols = st.columns(2)
-    index = 0
 
+    index = 0
     for label, value in data.items():
         with cols[index % 2]:
             st.metric(label, value)
