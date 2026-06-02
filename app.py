@@ -1,16 +1,17 @@
 import streamlit as st
 import time
+import os
 
 st.set_page_config(
-    page_title="Ratio Smart Charging",
+    page_title="Ratio Electric",
     page_icon="⚡",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# -----------------------------
-# Splash screen state
-# -----------------------------
+# --------------------------------------------------
+# Session state
+# --------------------------------------------------
 if "intro_done" not in st.session_state:
     st.session_state.intro_done = False
 
@@ -30,9 +31,9 @@ def select_mode(mode):
     st.session_state.screen = "detail"
 
 
-# -----------------------------
-# Styling
-# -----------------------------
+# --------------------------------------------------
+# CSS styling
+# --------------------------------------------------
 st.markdown(
     """
     <style>
@@ -50,35 +51,21 @@ st.markdown(
         background-color: #f6f8f6;
     }
 
-    .splash-screen {
-        height: 720px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+    .splash-title {
         text-align: center;
-    }
-
-    .splash-logo {
-        font-size: 46px;
-        font-weight: 900;
-        letter-spacing: 5px;
-        color: #103221;
-        margin-bottom: 6px;
+        font-size: 30px;
+        font-weight: 850;
+        color: #0f2a1d;
+        margin-top: 8px;
+        margin-bottom: 4px;
     }
 
     .splash-subtitle {
-        font-size: 15px;
+        text-align: center;
+        font-size: 14px;
         color: #6a716c;
+        margin-bottom: 20px;
         letter-spacing: 1px;
-    }
-
-    .splash-line {
-        width: 56px;
-        height: 4px;
-        background: #3f7d4e;
-        border-radius: 10px;
-        margin-top: 18px;
     }
 
     .app-title {
@@ -183,13 +170,9 @@ st.markdown(
         margin-bottom: 4px;
     }
 
-    .mode-menu {
-        margin-top: 6px;
-        margin-bottom: 8px;
-    }
-
     div.stButton > button {
         width: 100%;
+        min-height: 112px;
         border-radius: 24px;
         border: 1px solid #d8e5dc;
         background: white;
@@ -197,7 +180,7 @@ st.markdown(
         box-shadow: 0px 5px 18px rgba(0,0,0,0.07);
         white-space: pre-line;
         line-height: 1.25;
-        padding: 0.9rem 0.7rem;
+        padding: 1rem 0.7rem;
         font-size: 15px;
         font-weight: 750;
     }
@@ -206,11 +189,6 @@ st.markdown(
         background: #e8f2ec;
         border: 1px solid #3f7d4e;
         color: #103221;
-        transform: translateY(-1px);
-    }
-
-    div.stButton > button:active {
-        transform: scale(0.98);
     }
 
     .detail-header {
@@ -243,47 +221,44 @@ st.markdown(
         font-size: 14px;
         color: #6a716c;
     }
-
-    .back-space {
-        margin-top: 8px;
-    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
 
-# -----------------------------
-# Intro screen
-# -----------------------------
+# --------------------------------------------------
+# Intro screen with Ratio logo
+# --------------------------------------------------
+logo_path = "ratio_logo.png"
+
 if not st.session_state.intro_done:
-    st.markdown(
-        """
-        <div class="splash-screen">
-            <div class="splash-logo">RAATIO</div>
-            <div class="splash-subtitle">SMART CHARGING</div>
-            <div class="splash-line"></div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
+
+    if os.path.exists(logo_path):
+        c1, c2, c3 = st.columns([1, 2, 1])
+        with c2:
+            st.image(logo_path, use_container_width=True)
+
+    st.markdown('<div class="splash-title">Ratio Electric</div>', unsafe_allow_html=True)
+    st.markdown('<div class="splash-subtitle">SMART CHARGING</div>', unsafe_allow_html=True)
+
     time.sleep(3)
     st.session_state.intro_done = True
     st.rerun()
 
 
-# -----------------------------
+# --------------------------------------------------
 # General data
-# -----------------------------
+# --------------------------------------------------
 battery = 42
 
 modes = {
     "boost": {
         "icon": "⚡",
         "name": "Boost",
-        "short": "Snel extra bereik",
-        "subtitle": "Voor wanneer je snel weer weg moet.",
         "button": "⚡\nBoost\nSnel extra bereik",
+        "subtitle": "Voor wanneer je snel weer weg moet.",
         "status": "Laden start direct met hoge prioriteit.",
         "data": {
             "Focus": "Snelheid",
@@ -297,16 +272,15 @@ modes = {
     "morning": {
         "icon": "◐",
         "name": "Morgen klaar",
-        "short": "Op tijd klaar",
-        "subtitle": "Voor normaal avondgebruik.",
         "button": "◐\nMorgen klaar\nOp tijd klaar",
+        "subtitle": "Voor normaal avondgebruik.",
         "status": "De auto wordt slim opgeladen vóór de ingestelde vertrektijd.",
         "data": {
             "Vertrek": "08:00",
             "Start uiterlijk": "04:00",
             "Status": "Op tijd klaar",
         },
-        "certainty": "Als er geen goedkoop of duurzaam moment komt, start het systeem automatisch op tijd.",
+        "certainty": "Als er geen gunstig laadmoment komt, start het systeem automatisch op tijd.",
         "range_slider": True,
         "default_range": 70,
         "preference": False,
@@ -314,9 +288,8 @@ modes = {
     "smart": {
         "icon": "◍",
         "name": "Slim laden",
-        "short": "Beste balans",
-        "subtitle": "Voor wanneer er geen directe haast is.",
         "button": "◍\nSlim laden\nBeste balans",
+        "subtitle": "Voor wanneer er geen directe haast is.",
         "status": "Het systeem kiest het meest gunstige laadmoment.",
         "data": {
             "Prijs": "Meegenomen",
@@ -331,9 +304,8 @@ modes = {
     "full": {
         "icon": "▰",
         "name": "Vol bereik",
-        "short": "Lange rit",
-        "subtitle": "Voor wanneer er een lange rit gepland staat.",
         "button": "▰\nVol bereik\nLange rit",
+        "subtitle": "Voor wanneer er een lange rit gepland staat.",
         "status": "De auto wordt opgeladen tot een hoger laadniveau.",
         "data": {
             "Focus": "Zekerheid",
@@ -348,9 +320,8 @@ modes = {
     "routine": {
         "icon": "↻",
         "name": "Routine",
-        "short": "Vaste patronen",
-        "subtitle": "Voor terugkerend autogebruik.",
         "button": "↻\nRoutine\nVaste patronen",
+        "subtitle": "Voor terugkerend autogebruik.",
         "status": "Het laadplan volgt vaste vertrektijden en gewoontes.",
         "data": {
             "Vertrek": "08:00",
@@ -364,9 +335,8 @@ modes = {
     "manual": {
         "icon": "☰",
         "name": "Handmatig",
-        "short": "Zelf instellen",
-        "subtitle": "Voor gebruikers die zelf controle willen houden.",
         "button": "☰\nHandmatig\nZelf instellen",
+        "subtitle": "Voor gebruikers die zelf controle willen houden.",
         "status": "De gebruiker bepaalt zelf de belangrijkste laadinstellingen.",
         "data": {
             "Controle": "Hoog",
@@ -381,9 +351,9 @@ modes = {
 }
 
 
-# -----------------------------
+# --------------------------------------------------
 # Home screen
-# -----------------------------
+# --------------------------------------------------
 if st.session_state.screen == "home":
     st.markdown('<div class="app-title">Ratio Smart Charging</div>', unsafe_allow_html=True)
     st.markdown(
@@ -412,9 +382,9 @@ if st.session_state.screen == "home":
         st.rerun()
 
 
-# -----------------------------
+# --------------------------------------------------
 # Mode menu screen
-# -----------------------------
+# --------------------------------------------------
 elif st.session_state.screen == "modes":
     st.markdown('<div class="app-title">Kies laadmodus</div>', unsafe_allow_html=True)
     st.markdown(
@@ -460,16 +430,14 @@ elif st.session_state.screen == "modes":
             select_mode("manual")
             st.rerun()
 
-    st.markdown('<div class="back-space"></div>', unsafe_allow_html=True)
-
     if st.button("Terug"):
         go_to("home")
         st.rerun()
 
 
-# -----------------------------
+# --------------------------------------------------
 # Detail screen
-# -----------------------------
+# --------------------------------------------------
 elif st.session_state.screen == "detail":
     mode = modes[st.session_state.selected_mode]
 
@@ -508,7 +476,7 @@ elif st.session_state.screen == "detail":
         desired_range = None
 
     if mode["preference"]:
-        preference = st.selectbox(
+        st.selectbox(
             "Laadvoorkeur",
             ["Balans", "Goedkoop laden", "Duurzaam laden", "Snel laden"]
         )
