@@ -1,12 +1,14 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="EV Charging Prototype",
+    page_title="Ratio Smart Charging",
     page_icon="⚡",
     layout="centered"
 )
 
-# ---------- Styling ----------
+# -----------------------------
+# Styling
+# -----------------------------
 st.markdown(
     """
     <style>
@@ -32,37 +34,44 @@ st.markdown(
         padding: 22px;
         border-radius: 22px;
         box-shadow: 0px 4px 18px rgba(0,0,0,0.08);
-        margin-bottom: 22px;
+        margin-bottom: 25px;
     }
 
     .mode-card {
         background: white;
         padding: 18px;
-        border-radius: 18px;
+        border-radius: 20px;
         border: 1px solid #d9e6dc;
-        box-shadow: 0px 2px 10px rgba(0,0,0,0.04);
+        box-shadow: 0px 3px 12px rgba(0,0,0,0.06);
+        min-height: 155px;
         margin-bottom: 10px;
     }
 
+    .mode-icon {
+        font-size: 34px;
+        margin-bottom: 8px;
+    }
+
     .mode-title {
-        font-size: 20px;
-        font-weight: 700;
+        font-size: 19px;
+        font-weight: 800;
         color: #1f3d2b;
         margin-bottom: 4px;
     }
 
-    .mode-description {
+    .mode-text {
         font-size: 14px;
         color: #5c5c5c;
+        line-height: 1.35;
     }
 
     .active-box {
         background: #e7f3eb;
-        padding: 20px;
+        padding: 22px;
         border-radius: 20px;
         border-left: 6px solid #3f7d4e;
-        margin-top: 20px;
-        margin-bottom: 16px;
+        margin-top: 28px;
+        margin-bottom: 18px;
     }
 
     .warning-box {
@@ -85,19 +94,45 @@ st.markdown(
         font-weight: 800;
         margin-top: 0px;
     }
+
+    div.stButton > button {
+        width: 100%;
+        border-radius: 14px;
+        padding: 0.65rem;
+        font-weight: 700;
+        border: 1px solid #3f7d4e;
+        color: #1f3d2b;
+        background-color: #eef6f0;
+    }
+
+    div.stButton > button:hover {
+        background-color: #d7ebdd;
+        border: 1px solid #2f6b45;
+        color: #1f3d2b;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# ---------- Header ----------
+# -----------------------------
+# Session state
+# -----------------------------
+if "selected_mode" not in st.session_state:
+    st.session_state.selected_mode = None
+
+# -----------------------------
+# Header
+# -----------------------------
 st.markdown('<p class="app-title">Ratio Smart Charging</p>', unsafe_allow_html=True)
 st.markdown(
-    '<p class="subtitle">Gebruiksvriendelijke laadmodi voor een slim home energy management system.</p>',
+    '<p class="subtitle">Kies een laadmodus die past bij jouw situatie.</p>',
     unsafe_allow_html=True
 )
 
-# ---------- Status card ----------
+# -----------------------------
+# Status card
+# -----------------------------
 st.markdown('<div class="status-card">', unsafe_allow_html=True)
 
 st.subheader("Huidige toestand")
@@ -116,34 +151,113 @@ with col3:
     st.markdown('<p class="small-label">Vertrek</p>', unsafe_allow_html=True)
     st.markdown('<p class="big-value">08:00</p>', unsafe_allow_html=True)
 
-st.write("Auto is aangesloten. Het systeem kan nu een laadstrategie kiezen op basis van jouw situatie.")
+st.write("Auto is aangesloten. Het systeem kiest een laadstrategie op basis van jouw situatie.")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------- Mode selection ----------
+# -----------------------------
+# Visual mode menu
+# -----------------------------
 st.subheader("Kies een laadmodus")
 
-modus = st.radio(
-    "Selecteer de situatie die het beste past:",
-    [
-        "⚡ Boost-modus",
-        "🌙 Morgen klaar",
-        "🌱 Slim laden",
-        "🛣️ Vol bereik",
-        "📅 Routine",
-        "🎛️ Handmatig"
-    ],
-    label_visibility="collapsed"
-)
+modes = [
+    {
+        "key": "boost",
+        "icon": "⚡",
+        "title": "Boost-modus",
+        "text": "Voor wanneer je snel weer weg moet en direct extra bereik nodig hebt.",
+        "button": "Kies Boost"
+    },
+    {
+        "key": "morgen",
+        "icon": "🌙",
+        "title": "Morgen klaar",
+        "text": "Voor normaal avondgebruik. De auto moet morgenochtend klaar zijn.",
+        "button": "Kies Morgen klaar"
+    },
+    {
+        "key": "slim",
+        "icon": "🌱",
+        "title": "Slim laden",
+        "text": "Het systeem zoekt de beste balans tussen goedkoop, duurzaam en bereik.",
+        "button": "Kies Slim laden"
+    },
+    {
+        "key": "vol",
+        "icon": "🛣️",
+        "title": "Vol bereik",
+        "text": "Voor een lange rit waarbij je zekerheid wilt over voldoende actieradius.",
+        "button": "Kies Vol bereik"
+    },
+    {
+        "key": "routine",
+        "icon": "📅",
+        "title": "Routine",
+        "text": "Voor vaste patronen zoals werk, sport of school op terugkerende momenten.",
+        "button": "Kies Routine"
+    },
+    {
+        "key": "handmatig",
+        "icon": "🎛️",
+        "title": "Handmatig",
+        "text": "Voor gebruikers die zelf controle willen houden over tijd, kosten en laadniveau.",
+        "button": "Kies Handmatig"
+    }
+]
 
-# ---------- Mode explanation ----------
-if modus == "⚡ Boost-modus":
+# Eerste rij
+row1 = st.columns(3)
+
+for i in range(3):
+    mode = modes[i]
+    with row1[i]:
+        st.markdown(
+            f"""
+            <div class="mode-card">
+                <div class="mode-icon">{mode["icon"]}</div>
+                <div class="mode-title">{mode["title"]}</div>
+                <div class="mode-text">{mode["text"]}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button(mode["button"], key=mode["key"]):
+            st.session_state.selected_mode = mode["key"]
+
+# Tweede rij
+row2 = st.columns(3)
+
+for i in range(3, 6):
+    mode = modes[i]
+    with row2[i - 3]:
+        st.markdown(
+            f"""
+            <div class="mode-card">
+                <div class="mode-icon">{mode["icon"]}</div>
+                <div class="mode-title">{mode["title"]}</div>
+                <div class="mode-text">{mode["text"]}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        if st.button(mode["button"], key=mode["key"]):
+            st.session_state.selected_mode = mode["key"]
+
+# -----------------------------
+# Detail screen after selection
+# -----------------------------
+selected = st.session_state.selected_mode
+
+if selected is not None:
+    st.divider()
+
+if selected == "boost":
     st.markdown(
         """
         <div class="active-box">
             <div class="mode-title">⚡ Boost-modus actief</div>
-            <div class="mode-description">
-                Voor wanneer je snel weer weg moet en direct extra bereik nodig hebt.
+            <div class="mode-text">
+                De auto wordt direct opgeladen met hoge prioriteit.
             </div>
         </div>
         """,
@@ -154,16 +268,15 @@ if modus == "⚡ Boost-modus":
     st.write("- Start direct met laden")
     st.write("- Geeft prioriteit aan snelheid")
     st.write("- Optimalisatie op kosten of duurzaamheid is tijdelijk minder belangrijk")
-
     st.success("Verwacht toegevoegd bereik: +45 km in 30 minuten.")
 
-elif modus == "🌙 Morgen klaar":
+elif selected == "morgen":
     st.markdown(
         """
         <div class="active-box">
             <div class="mode-title">🌙 Morgen klaar-modus actief</div>
-            <div class="mode-description">
-                Voor normaal avondgebruik. De auto moet morgenochtend klaar zijn.
+            <div class="mode-text">
+                De auto wordt slim opgeladen vóór de ingestelde vertrektijd.
             </div>
         </div>
         """,
@@ -188,23 +301,22 @@ elif modus == "🌙 Morgen klaar":
 
     st.success("Status: auto is op tijd klaar voor vertrek om 08:00.")
 
-elif modus == "🌱 Slim laden":
+elif selected == "slim":
     st.markdown(
         """
         <div class="active-box">
             <div class="mode-title">🌱 Slim laden actief</div>
-            <div class="mode-description">
-                Voor wanneer er geen directe haast is en het systeem het beste laadmoment mag kiezen.
+            <div class="mode-text">
+                Het systeem kiest het beste laadmoment op basis van kosten, duurzaamheid en bereik.
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    voorkeur = st.segmented_control(
+    voorkeur = st.selectbox(
         "Optimalisatievoorkeur",
-        ["Balans", "Goedkoop", "Duurzaam"],
-        default="Balans"
+        ["Balans", "Goedkoop laden", "Duurzaam laden"]
     )
 
     st.write("**Wat doet het systeem?**")
@@ -214,14 +326,15 @@ elif modus == "🌱 Slim laden":
     st.write("- Bewaakt altijd het gewenste bereik")
 
     st.info(f"Gekozen voorkeur: **{voorkeur}**")
+    st.success("De auto blijft op tijd klaar.")
 
-elif modus == "🛣️ Vol bereik":
+elif selected == "vol":
     st.markdown(
         """
         <div class="active-box">
             <div class="mode-title">🛣️ Vol bereik-modus actief</div>
-            <div class="mode-description">
-                Voor wanneer je een lange rit gepland hebt en zekerheid over actieradius nodig hebt.
+            <div class="mode-text">
+                De auto wordt opgeladen voor een lange rit met maximale zekerheid.
             </div>
         </div>
         """,
@@ -232,16 +345,15 @@ elif modus == "🛣️ Vol bereik":
     st.write("- Laadt tot een hoger batterijpercentage")
     st.write("- Geeft prioriteit aan zekerheid")
     st.write("- Optimaliseert alleen als er genoeg tijd overblijft")
-
     st.success("Gewenst laadniveau: 90% of hoger.")
 
-elif modus == "📅 Routine":
+elif selected == "routine":
     st.markdown(
         """
         <div class="active-box">
             <div class="mode-title">📅 Routine-modus actief</div>
-            <div class="mode-description">
-                Voor terugkerend autogebruik, zoals werk, sport of vaste weekmomenten.
+            <div class="mode-text">
+                Het systeem gebruikt vaste patronen om automatisch een laadplanning te maken.
             </div>
         </div>
         """,
@@ -252,16 +364,15 @@ elif modus == "📅 Routine":
     st.write("- Gebruikt vaste vertrektijden")
     st.write("- Past het laadplan aan op herhalende gewoontes")
     st.write("- Laat de gebruiker altijd afwijken van de routine")
-
     st.info("Normale vertrektijd: 08:00 | Normale thuiskomst: 18:00")
 
-elif modus == "🎛️ Handmatig":
+elif selected == "handmatig":
     st.markdown(
         """
         <div class="active-box">
             <div class="mode-title">🎛️ Handmatige modus actief</div>
-            <div class="mode-description">
-                Voor gebruikers die zelf controle willen houden over het laadproces.
+            <div class="mode-text">
+                De gebruiker stelt zelf de belangrijkste laadinstellingen in.
             </div>
         </div>
         """,
