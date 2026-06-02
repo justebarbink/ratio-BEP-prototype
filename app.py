@@ -37,34 +37,6 @@ st.markdown(
         margin-bottom: 25px;
     }
 
-    .mode-card {
-        background: white;
-        padding: 18px;
-        border-radius: 20px;
-        border: 1px solid #d9e6dc;
-        box-shadow: 0px 3px 12px rgba(0,0,0,0.06);
-        min-height: 155px;
-        margin-bottom: 10px;
-    }
-
-    .mode-icon {
-        font-size: 34px;
-        margin-bottom: 8px;
-    }
-
-    .mode-title {
-        font-size: 19px;
-        font-weight: 800;
-        color: #1f3d2b;
-        margin-bottom: 4px;
-    }
-
-    .mode-text {
-        font-size: 14px;
-        color: #5c5c5c;
-        line-height: 1.35;
-    }
-
     .active-box {
         background: #e7f3eb;
         padding: 22px;
@@ -95,19 +67,45 @@ st.markdown(
         margin-top: 0px;
     }
 
+    .mode-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #1f3d2b;
+        margin-bottom: 4px;
+    }
+
+    .mode-text {
+        font-size: 14px;
+        color: #5c5c5c;
+        line-height: 1.35;
+    }
+
+    /* This makes the whole mode card a clickable button */
     div.stButton > button {
         width: 100%;
-        border-radius: 14px;
-        padding: 0.65rem;
-        font-weight: 700;
-        border: 1px solid #3f7d4e;
+        min-height: 165px;
+        border-radius: 22px;
+        padding: 1.1rem;
+        font-weight: 600;
+        border: 1px solid #d9e6dc;
         color: #1f3d2b;
-        background-color: #eef6f0;
+        background-color: white;
+        box-shadow: 0px 3px 12px rgba(0,0,0,0.06);
+        text-align: left;
+        white-space: pre-wrap;
+        line-height: 1.35;
+        font-size: 15px;
     }
 
     div.stButton > button:hover {
-        background-color: #d7ebdd;
-        border: 1px solid #2f6b45;
+        background-color: #e7f3eb;
+        border: 1px solid #3f7d4e;
+        color: #1f3d2b;
+    }
+
+    div.stButton > button:focus {
+        background-color: #e7f3eb;
+        border: 2px solid #3f7d4e;
         color: #1f3d2b;
     }
     </style>
@@ -165,82 +163,58 @@ modes = [
         "key": "boost",
         "icon": "⚡",
         "title": "Boost-modus",
-        "text": "Voor wanneer je snel weer weg moet en direct extra bereik nodig hebt.",
-        "button": "Kies Boost"
+        "text": "Voor wanneer je snel weer weg moet en direct extra bereik nodig hebt."
     },
     {
         "key": "morgen",
         "icon": "🌙",
         "title": "Morgen klaar",
-        "text": "Voor normaal avondgebruik. De auto moet morgenochtend klaar zijn.",
-        "button": "Kies Morgen klaar"
+        "text": "Voor normaal avondgebruik. De auto moet morgenochtend klaar zijn."
     },
     {
         "key": "slim",
         "icon": "🌱",
         "title": "Slim laden",
-        "text": "Het systeem zoekt de beste balans tussen goedkoop, duurzaam en bereik.",
-        "button": "Kies Slim laden"
+        "text": "Het systeem zoekt de beste balans tussen goedkoop, duurzaam en bereik."
     },
     {
         "key": "vol",
         "icon": "🛣️",
         "title": "Vol bereik",
-        "text": "Voor een lange rit waarbij je zekerheid wilt over voldoende actieradius.",
-        "button": "Kies Vol bereik"
+        "text": "Voor een lange rit waarbij je zekerheid wilt over voldoende actieradius."
     },
     {
         "key": "routine",
         "icon": "📅",
         "title": "Routine",
-        "text": "Voor vaste patronen zoals werk, sport of school op terugkerende momenten.",
-        "button": "Kies Routine"
+        "text": "Voor vaste patronen zoals werk, sport of school op terugkerende momenten."
     },
     {
         "key": "handmatig",
         "icon": "🎛️",
         "title": "Handmatig",
-        "text": "Voor gebruikers die zelf controle willen houden over tijd, kosten en laadniveau.",
-        "button": "Kies Handmatig"
+        "text": "Voor gebruikers die zelf controle willen houden over tijd, kosten en laadniveau."
     }
 ]
 
-# Eerste rij
+# First row of cards
 row1 = st.columns(3)
 
 for i in range(3):
     mode = modes[i]
     with row1[i]:
-        st.markdown(
-            f"""
-            <div class="mode-card">
-                <div class="mode-icon">{mode["icon"]}</div>
-                <div class="mode-title">{mode["title"]}</div>
-                <div class="mode-text">{mode["text"]}</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button(mode["button"], key=mode["key"]):
+        label = f'{mode["icon"]}  {mode["title"]}\n\n{mode["text"]}'
+        if st.button(label, key=mode["key"]):
             st.session_state.selected_mode = mode["key"]
 
-# Tweede rij
+# Second row of cards
 row2 = st.columns(3)
 
 for i in range(3, 6):
     mode = modes[i]
     with row2[i - 3]:
-        st.markdown(
-            f"""
-            <div class="mode-card">
-                <div class="mode-icon">{mode["icon"]}</div>
-                <div class="mode-title">{mode["title"]}</div>
-                <div class="mode-text">{mode["text"]}</div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        if st.button(mode["button"], key=mode["key"]):
+        label = f'{mode["icon"]}  {mode["title"]}\n\n{mode["text"]}'
+        if st.button(label, key=mode["key"]):
             st.session_state.selected_mode = mode["key"]
 
 # -----------------------------
