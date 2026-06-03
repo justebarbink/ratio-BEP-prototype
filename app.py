@@ -170,25 +170,32 @@ st.markdown(
         margin-bottom: 4px;
     }
 
+    /* MENU BUTTONS: card style like the example */
     div.stButton > button {
         width: 100%;
-        min-height: 112px;
-        border-radius: 24px;
+        min-height: 82px;
+        border-radius: 22px;
         border: 1px solid #d8e5dc;
         background: white;
         color: #103221;
         box-shadow: 0px 5px 18px rgba(0,0,0,0.07);
         white-space: pre-line;
-        line-height: 1.25;
-        padding: 1rem 0.7rem;
+        line-height: 1.18;
+        padding: 0.75rem 0.85rem;
         font-size: 15px;
-        font-weight: 750;
+        font-weight: 650;
+        text-align: left;
     }
 
     div.stButton > button:hover {
-        background: #e8f2ec;
+        background: #f0f7f2;
         border: 1px solid #3f7d4e;
         color: #103221;
+        transform: translateY(-1px);
+    }
+
+    div.stButton > button:active {
+        transform: scale(0.98);
     }
 
     .detail-header {
@@ -226,7 +233,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 # --------------------------------------------------
 # Intro screen with Ratio logo
 # --------------------------------------------------
@@ -257,7 +263,7 @@ modes = {
     "boost": {
         "icon": "⚡",
         "name": "Boost",
-        "button": "⚡\nBoost\nSnel extra bereik",
+        "button": "⚡   Boost\n      Snel extra bereik",
         "subtitle": "Voor wanneer je snel weer weg moet.",
         "status": "Laden start direct met hoge prioriteit.",
         "data": {
@@ -270,9 +276,9 @@ modes = {
         "preference": False,
     },
     "morning": {
-        "icon": "◐",
+        "icon": "🌙",
         "name": "Morgen klaar",
-        "button": "◐\nMorgen klaar\nOp tijd klaar",
+        "button": "🌙   Morgen klaar\n      Op tijd klaar",
         "subtitle": "Voor normaal avondgebruik.",
         "status": "De auto wordt slim opgeladen vóór de ingestelde vertrektijd.",
         "data": {
@@ -286,9 +292,9 @@ modes = {
         "preference": False,
     },
     "smart": {
-        "icon": "◍",
+        "icon": "🌱",
         "name": "Slim laden",
-        "button": "◍\nSlim laden\nBeste balans",
+        "button": "🌱   Slim laden\n      Beste balans",
         "subtitle": "Voor wanneer er geen directe haast is.",
         "status": "Het systeem kiest het meest gunstige laadmoment.",
         "data": {
@@ -304,7 +310,7 @@ modes = {
     "full": {
         "icon": "▰",
         "name": "Vol bereik",
-        "button": "▰\nVol bereik\nLange rit",
+        "button": "▰   Vol bereik\n      Lange rit",
         "subtitle": "Voor wanneer er een lange rit gepland staat.",
         "status": "De auto wordt opgeladen tot een hoger laadniveau.",
         "data": {
@@ -318,9 +324,9 @@ modes = {
         "preference": False,
     },
     "routine": {
-        "icon": "↻",
+        "icon": "⏱",
         "name": "Routine",
-        "button": "↻\nRoutine\nVaste patronen",
+        "button": "⏱   Routine\n      Vaste patronen",
         "subtitle": "Voor terugkerend autogebruik.",
         "status": "Het laadplan volgt vaste vertrektijden en gewoontes.",
         "data": {
@@ -335,7 +341,7 @@ modes = {
     "manual": {
         "icon": "☰",
         "name": "Handmatig",
-        "button": "☰\nHandmatig\nZelf instellen",
+        "button": "☰   Handmatig\n      Zelf instellen",
         "subtitle": "Voor gebruikers die zelf controle willen houden.",
         "status": "De gebruiker bepaalt zelf de belangrijkste laadinstellingen.",
         "data": {
@@ -429,6 +435,8 @@ elif st.session_state.screen == "modes":
         if st.button(modes["manual"]["button"]):
             select_mode("manual")
             st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
     if st.button("Terug"):
         go_to("home")
